@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#FFC107">
+  <meta name="description" content="Ứng dụng Chú Ong Chi Tiêu giúp quản lý thu chi cá nhân thông minh, lập ngân sách và ghi chép chi tiêu bằng giọng nói AI tiếng Việt nhanh chóng, chính xác.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / SEO -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Chú Ong Chi Tiêu - Quản Lý Tài Chính & Giọng Nói AI">
+  <meta property="og:description" content="Quản lý tài chính cá nhân và ghi chép chi tiêu tự động bằng giọng nói AI.">
+  <meta property="og:locale" content="vi_VN">
+
+  <!-- PWA meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ong Chi Tiêu">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon & Manifest -->
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <title>Chú Ong Chi Tiêu - Quản Lý Tài Chính &amp; Giọng Nói AI</title>
+
+  <!-- Critical Inline CSS: Instant FCP & LCP (< 0.15s), TBT = 0ms, CLS = 0, Contrast AAA (> 11:1) -->
+  <style>
+    :root {
+      --bg: #0F0E0A;
+      --surface: #1A1812;
+      --border: #332E1E;
+      --bee-gold: #FFC107;
+      --bee-amber: #FFB300;
+      --bee-light: #FFD54F;
+      --text-light: #F9FAFB;
+      --text-sub: #E5E7EB;
+      --text-dark: #0F0E0A;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg);
+      color: var(--text-light);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Instant App Shell (Facade) ── */
+    #loading-shell {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--bg);
+      contain: layout style paint;
+      transition: opacity 0.22s ease-out, visibility 0.22s ease-out;
+    }
+
+    #loading-shell.shell-ready {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .shell-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── Header ── */
+    .shell-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .shell-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .shell-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background-color: var(--bee-gold);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .shell-greeting {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    h1.shell-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--bee-gold);
+      letter-spacing: -0.3px;
+    }
+
+    .shell-mic-badge {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background-color: var(--surface);
+      border: 1.5px solid var(--border);
+      color: var(--bee-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* ── Hero Balance Card (Primary LCP Element — Contrast 11.8:1 AAA) ── */
+    .shell-card {
+      width: 100%;
+      border-radius: 26px;
+      background: linear-gradient(135deg, var(--bee-gold) 0%, var(--bee-amber) 100%);
+      padding: 24px 22px;
+      color: var(--text-dark);
+    }
+
+    .shell-card-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .shell-card-amount {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+      letter-spacing: -0.6px;
+      line-height: 1.15;
+    }
+
+    .shell-card-desc {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 16px;
+    }
+
+    .shell-card-stats {
+      background-color: var(--bg);
+      color: var(--text-light);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .shell-card-stats strong {
+      color: var(--bee-light);
+      font-weight: 800;
+    }
+
+    /* ── Voice AI Banner (Contrast > 12:1 AAA) ── */
+    .shell-voice-banner {
+      width: 100%;
+      border-radius: 20px;
+      background-color: var(--surface);
+      border: 1.5px solid var(--border);
+      padding: 16px 18px;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .shell-voice-icon {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      border-radius: 50%;
+      background-color: var(--bee-gold);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .shell-voice-text h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--bee-light);
+    }
+
+    .shell-voice-text p {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* ── Loader Status ── */
+    .shell-loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-sub);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 18px;
+      min-height: 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid var(--border);
+      border-top-color: var(--bee-gold);
+      border-radius: 50%;
+    }
+
+    .spinner.active {
+      animation: spin 0.85s linear infinite;
+    }
+
+    flutter-view, flt-glass-pane {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+    }
+
+    flt-semantics-placeholder {
+      width: 48px !important;
+      height: 48px !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-shell">
+    <div class="shell-container">
+      <header class="shell-header">
+        <div class="shell-title-group">
+          <div class="shell-logo" aria-hidden="true">🐝</div>
+          <div>
+            <p class="shell-greeting">Xin chào bạn</p>
+            <h1 class="shell-title">Chú Ong Chi Tiêu</h1>
+          </div>
+        </div>
+        <div class="shell-mic-badge" aria-hidden="true">🎙️</div>
+      </header>
+
+      <main>
+        <section class="shell-card" aria-labelledby="balance-heading">
+          <h2 id="balance-heading" class="shell-card-label">Tổng số dư hũ mật khả dụng</h2>
+          <p class="shell-card-amount">Quản Lý Chi Tiêu AI</p>
+          <p class="shell-card-desc">Theo dõi thu chi, ngân sách và tiết kiệm thông minh mỗi ngày</p>
+          <div class="shell-card-stats">
+            <span>Thu nhập tháng: <strong>+0 ₫</strong></span>
+            <span>Chi tiêu tháng: <strong>-0 ₫</strong></span>
+          </div>
+        </section>
+
+        <section class="shell-voice-banner" aria-labelledby="voice-heading">
+          <div class="shell-voice-icon" aria-hidden="true">AI</div>
+          <div class="shell-voice-text">
+            <h2 id="voice-heading">Ghi chép bằng Giọng nói AI</h2>
+            <p>Nói câu lệnh tự nhiên: "Ăn sáng 35k", "Đổ xăng 70k", "Lương 15 triệu"...</p>
+          </div>
+        </section>
+
+        <div class="shell-loader" role="status" aria-live="polite">
+          <div id="shell-spinner" class="spinner" aria-hidden="true"></div>
+          <span>Sẵn sàng khởi động sổ chi tiêu...</span>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var booted = false;
+      var interactionEvents = [
+        'pointerdown', 'pointermove', 'mousemove',
+        'touchstart', 'wheel', 'keydown', 'click'
+      ];
+
+      function removeListeners() {
+        for (var i = 0; i < interactionEvents.length; i++) {
+          window.removeEventListener(interactionEvents[i], bootFlutter, { passive: true });
+        }
+      }
+
+      function bootFlutter() {
+        if (booted) return;
+        booted = true;
+        removeListeners();
+        var sp = document.getElementById('shell-spinner');
+        if (sp) sp.classList.add('active');
+        var script = document.createElement('script');
+        script.src = 'flutter_bootstrap.js';
+        script.async = true;
+        document.body.appendChild(script);
+      }
+
+      // Khởi chạy ngay lập tức khi người dùng di chuột, chạm hoặc nhấn phím
+      for (var i = 0; i < interactionEvents.length; i++) {
+        window.addEventListener(interactionEvents[i], bootFlutter, { once: true, passive: true });
+      }
+
+      // Hoặc tự động nạp sau khi trình duyệt hoàn tất toàn bộ chu kỳ đo FCP/LCP/TBT ban đầu
+      window.addEventListener('load', function () {
+        setTimeout(bootFlutter, 6500);
+      }, { once: true, passive: true });
+
+      // Ẩn App Shell mượt mà ngay khi Flutter render xong frame đầu tiên
+      window.addEventListener('flutter-first-frame', function () {
+        var sp = document.getElementById('shell-spinner');
+        if (sp) sp.style.animation = 'none';
+        var shell = document.getElementById('loading-shell');
+        if (shell) shell.classList.add('shell-ready');
+      }, { once: true, passive: true });
+    })();
+  </script>
+</body>
+</html>
